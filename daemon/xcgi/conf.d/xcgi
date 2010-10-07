@@ -1,4 +1,4 @@
 PHP_CGI=/usr/bin/php-cgi
 PORT=9000
-VHOSTS=/etc/xcgi/vhosts
+VHOSTS=/home/kuno/portal/vhosts/xcgi
 PIDFILE=/var/run/xcgi.pid
