@@ -25,9 +25,6 @@ case "$1" in
             elif [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
                 /opt/google-appengine/dev_appserver.py -d $ROOT_DIR --address=$IP --port=8080 &
                 pidof -s python2.5 >> $PIDFILE
-            elif [ $LANGUAGE = 'php' ] && [ $FLAMEWORK = 'none' ] ; then
-                cgi-fcgi -start -connect $IP:$PORT $PHP_CGI
-                pidof -s $PHP_CGI >> $PIDFILE
             elif [ $LANGUAGE = 'javascript' ] && [ $FLAMEWORK = 'none' ] ; then
                 cd $ROOT_DIR
                 spark -H $IP &
@@ -41,6 +38,7 @@ case "$1" in
 
         if [ -e $PIDFILE ] ; then
             add_daemon xcgi
+            /etc/rc.d/php-fpm start
             stat_done
         else
             stat_fail
@@ -48,6 +46,7 @@ case "$1" in
         ;; 
     stop)
         stat_busy "Stopping CGI Server"
+        /etc/rc.d/php-fpm stop
         [ -e /var/run/daemons/xcgi ] && [ -e $PIDFILE ]
         PIDS=`cat $PIDFILE`
         for pid in $PIDS
