@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# general config
+
+. /etc/conf.d/asrv
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+# global varaibles
+declare PIDS
+FILES=$(find $VHOSTS -name \*\.conf)
+
+case "$1" in
+  start)
+    stat_busy "Starting Appengine Development Servers"
+    for file in $FILES
+    do
+      . $file
+
+      if [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
+        cd $ROOT
+        /opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT/dev_appserver.datastore $ROOT_DIR --address=$ADDR --port $PORT --use_sqlite &
+        pidof -s python2.5 >> $PIDFILE
+      else
+        echo "Unknow language or flamework."
+      fi
+
+    done
+
+    if [ -e $PIDFILE ] ; then
+      add_daemon asrv
+      stat_done
+    else
+      stat_fail
+    fi
+    ;; 
+  stop)
+    stat_busy "Stopping CGI Server"
+    [ -e /var/run/daemons/asrv ] && [ -e $PIDFILE ]
+    PIDS=`cat $PIDFILE`
+    for pid in $PIDS
+    do
+      kill  $pid &> /dev/null
+      #killall gunicorn_django
+    done
+
+    if [ $? -ne 0 ] ; then
+      stat_fail
+    else
+      rm_daemon asrv
+      rm $PIDFILE
+      stat_done
+    fi
+    ;;
+  restart)
+    $0 stop
+    sleep 1
+    $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|}"  
+esac
