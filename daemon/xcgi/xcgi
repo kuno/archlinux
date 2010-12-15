@@ -7,67 +7,64 @@
 . /etc/rc.d/functions
 
 # global varaibles
-declare PIDS
+	declare PIDS
 FILES=$(find $VHOSTS -name \*\.conf)
 
+	case "$1" in
+	start)
+	stat_busy "Starting CGI Server"
+	for file in $FILES
+	do
+	. $file
 
-case "$1" in
-    start)
-        stat_busy "Starting CGI Server"
-        for file in $FILES
-        do
-            . $file
+	if [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'django' ] ; then
+	cd $ROOT_DIR
+	gunicorn_django settings.py -b $ADDR:$PORT --debug --daemon
+	pidof -s python2 >> $PIDFILE
+	elif [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
+        cd $ROOT_DIR
+	/opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT_DIR/dev_appserver.datastore $ROOT_DIR --address=$ADDR --port $PORT --use_sqlite &
+	pidof -s python2.5 >> $PIDFILE
+	elif [ $LANGUAGE = 'javascript' ] && [ $PLATFORM = 'nodejs' ] ; then
+	cd $ROOT_DIR
+        node $SCRIPT $ADDR $PORT &
+	pidof node -s >> $PIDFILE
+	else
+	echo "Unknow language or flamework."
+	fi
 
-            if [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'django' ] ; then
-                cd $ROOT_DIR
-                gunicorn_django settings.py -b $IP:$PORT --debug --daemon
-                pidof -s python >> $PIDFILE
-            elif [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
-                /opt/google-appengine/dev_appserver.py -d $ROOT_DIR --address=$IP --port=8080 &
-                pidof -s python2.5 >> $PIDFILE
-            elif [ $LANGUAGE = 'javascript' ] && [ $FLAMEWORK = 'none' ] ; then
-                cd $ROOT_DIR
-                spark -H $IP &
-                pidof -s node >> $PIDFILE
-            else
-                echo "Unknow language or flamework."
-                stat_fail
-            fi
+	done
 
-        done
+	if [ -e $PIDFILE ] ; then
+	add_daemon xcgi
+	stat_done
+	else
+	stat_fail
+	fi
+	;; 
+	stop)
+	stat_busy "Stopping CGI Server"
+	[ -e /var/run/daemons/xcgi ] && [ -e $PIDFILE ]
+	PIDS=`cat $PIDFILE`
+	for pid in $PIDS
+	do
+	kill  $pid &> /dev/null
+#killall gunicorn_django
+	done
 
-        if [ -e $PIDFILE ] ; then
-            add_daemon xcgi
-            /etc/rc.d/php-fpm start
-            stat_done
-        else
-            stat_fail
-        fi
-        ;; 
-    stop)
-        stat_busy "Stopping CGI Server"
-        /etc/rc.d/php-fpm stop
-        [ -e /var/run/daemons/xcgi ] && [ -e $PIDFILE ]
-        PIDS=`cat $PIDFILE`
-        for pid in $PIDS
-        do
-            kill  $pid &> /dev/null
-            #killall gunicorn_django
-        done
-
-        if [ $? -ne 0 ] ; then
-            stat_fail
-        else
-            rm_daemon xcgi
-            rm $PIDFILE
-            stat_done
-        fi
-        ;;
-    restart)
-        $0 stop
-        sleep 1
-        $0 start
-        ;;
-    *)
-        echo "Usage: $0 {start|stop|restart|}"  
-esac
+	if [ $? -ne 0 ] ; then
+	stat_fail
+	else
+	rm_daemon xcgi
+	rm $PIDFILE
+	stat_done
+	fi
+	;;
+	restart)
+	$0 stop
+	sleep 1
+	$0 start
+	;;
+	*)
+	echo "Usage: $0 {start|stop|restart|}"  
+	esac
