@@ -2,7 +2,7 @@
 
 # general config
 
-. /etc/conf.d/asrv
+. /etc/conf.d/appengine
 . /etc/rc.conf
 . /etc/rc.d/functions
 
@@ -19,7 +19,7 @@ case "$1" in
 
       if [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
         cd $ROOT
-        /opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT/dev_appserver.datastore $ROOT_DIR --address=$ADDR --port $PORT --use_sqlite &
+        /opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT/dev_appserver.datastore $ROOT --address=$ADDR --port $PORT --use_sqlite &
         pidof -s python2.5 >> $PIDFILE
       else
         echo "Unknow language or flamework."
@@ -28,15 +28,15 @@ case "$1" in
     done
 
     if [ -e $PIDFILE ] ; then
-      add_daemon asrv
+      add_daemon appengine
       stat_done
     else
       stat_fail
     fi
     ;; 
   stop)
-    stat_busy "Stopping CGI Server"
-    [ -e /var/run/daemons/asrv ] && [ -e $PIDFILE ]
+    stat_busy "Stopping Appengine Development Servers"
+    [ -e /var/run/daemons/appengine ] && [ -e $PIDFILE ]
     PIDS=`cat $PIDFILE`
     for pid in $PIDS
     do
@@ -47,7 +47,7 @@ case "$1" in
     if [ $? -ne 0 ] ; then
       stat_fail
     else
-      rm_daemon asrv
+      rm_daemon appengine
       rm $PIDFILE
       stat_done
     fi
