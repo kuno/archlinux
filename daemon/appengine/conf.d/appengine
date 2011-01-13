@@ -1,2 +1,2 @@
-VHOSTS=/etc/appengine/vhosts/appengine
+VHOSTS=/etc/appengine/vhosts
 PIDFILS=/var/run/appengine.pid
