@@ -17,7 +17,9 @@ case "$1" in
       cd $REPO_DIR/$folder || return 1
       stat_busy "Working in repository $folder"
       if [ -d $REPO_DIR/$folder/.git ]; then
-        git checkout master && git pull
+        if [ -d $REPO_DIR/$folder/.git/refs/remotes ]; then
+          git pull
+        fi
       elif [ -d $REPO_DIR/$folder/.hg ]; then
         hg pull && hg update
       else
