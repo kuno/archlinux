@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# general config
+
+. /etc/conf.d/crane
+. /etc/rc.conf
+. /etc/rc.d/functions
+
+# global varaibles
+FOLDERS=$(ls $REPO_DIR)
+
+case "$1" in
+  pull)
+    stat_busy "Pull data from remove server"
+    for folder in $FOLDERS
+    do
+      cd $REPO_DIR/$folder || return 1
+      if [ -d $REPO_DIR/$folder/.git ]; then
+        git pull
+      elif [ -d $REPO_DIR/$folder/.hg ]; then
+        hg pull && hg update
+      else
+        echo "Not a repository folder."
+      fi
+    done
+    ;;
+  push)
+    stat_busy "Push data to remote server."
+    for folder in $FOLDERS; do
+      cd $REPO_DIR/$folder || return 1
+      if [ -d $REPO_DIR/$folder/.git ]; then
+        git push origin master
+      elif [ -d $REPO_DIR/$folder/.hg ]; then
+        hg push
+      else
+        echo "Not a repository folder."
+      fi
+    done
+    ;;
+  *)
+    echo "Usage: $0 {pull|push}"
+esac
