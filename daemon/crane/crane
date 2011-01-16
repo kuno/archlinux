@@ -11,7 +11,7 @@ FOLDERS=$(ls $REPO_DIR)
 
 case "$1" in
   pull)
-    stat_busy "Pull data from remove server"
+    stat_busy "Pull data from remote server"
     for folder in $FOLDERS
     do
       cd $REPO_DIR/$folder || return 1
@@ -23,32 +23,31 @@ case "$1" in
       elif [ -d $REPO_DIR/$folder/.hg ]; then
         hg pull && hg update
       else
-        stat_busy "$folder is not a repository folder."
+        stat_busy "$folder is not a repository folder"
       fi
     done
     ;;
   push)
-    stat_busy "Push data to remote server."
+    stat_busy "Push data to remote server"
     for folder in $FOLDERS; do
       stat_busy "Working in repository $folder"
       cd $REPO_DIR/$folder || return 1
       if [ -d $REPO_DIR/$folder/.git ]; then
-        if [ -d $REPO_DIR/$folder/.git ]; then
-          if [ -d $REPO_DIR/$folder/.git/refs/remotes ]; then
-            git push
-          fi 
-        elif [ -d $REPO_DIR/$folder/.hg ]; then
-          hg push
-        else
-          stat_busy "$folder is not a repository folder."
-        fi
-      done
-      ;;
-    start)
-      $0 push
-      sleep 1
-      $0 pull
-      ;;
-    *)
-      echo "Usage: $0 {pull|push|start}"
-  esac
+        if [ -d $REPO_DIR/$folder/.git/refs/remotes ]; then
+          git push
+        fi 
+      elif [ -d $REPO_DIR/$folder/.hg ]; then
+        hg push
+      else
+        stat_busy "$folder is not a repository folder"
+      fi
+    done
+    ;;
+  start)
+    $0 push
+    sleep 1
+    $0 pull
+    ;;
+  *)
+    echo "Usage: $0 {pull|push|start}"
+esac
