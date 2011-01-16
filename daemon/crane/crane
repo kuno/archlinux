@@ -25,6 +25,7 @@ case "$1" in
       else
         stat_busy "$folder is not a repository folder"
       fi
+      chown -R kuno:root $REPO_DIR/$folder || return 1
     done
     ;;
   push)
@@ -41,6 +42,7 @@ case "$1" in
       else
         stat_busy "$folder is not a repository folder"
       fi
+      chown -R kuno:root $REPO_DIR/$folder || return 1 
     done
     ;;
   start)
