@@ -10,7 +10,7 @@
 FOLDERS=$(ls $REPO_DIR)
 
 case "$1" in
-  start)
+  pull)
     stat_busy "Pull data from remove server"
     for folder in $FOLDERS
     do
@@ -33,19 +33,22 @@ case "$1" in
       stat_busy "Working in repository $folder"
       cd $REPO_DIR/$folder || return 1
       if [ -d $REPO_DIR/$folder/.git ]; then
-        git push origin master
-      elif [ -d $REPO_DIR/$folder/.hg ]; then
-        hg push
-      else
-        stat_busy "$folder is not a repository folder."
-      fi
-    done
-    ;;
-  link)
-    $0 pull
-    sleep 1
-    $0 push
-    ;;
-  *)
-    echo "Usage: $0 {pull|push|start}"
-esac
+        if [ -d $REPO_DIR/$folder/.git ]; then
+          if [ -d $REPO_DIR/$folder/.git/refs/remotes ]; then
+            git push
+          fi 
+        elif [ -d $REPO_DIR/$folder/.hg ]; then
+          hg push
+        else
+          stat_busy "$folder is not a repository folder."
+        fi
+      done
+      ;;
+    start)
+      $0 push
+      sleep 1
+      $0 pull
+      ;;
+    *)
+      echo "Usage: $0 {pull|push|start}"
+  esac
