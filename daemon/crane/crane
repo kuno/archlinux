@@ -34,6 +34,7 @@ case "$1" in
       stat_busy "Working in repository $folder"
       cd $REPO_DIR/$folder || return 1
       if [ -d $REPO_DIR/$folder/.git ]; then
+        git add . && git commit -a -m 'added by crane'
         if [ -d $REPO_DIR/$folder/.git/refs/remotes ]; then
           git push
         fi 
