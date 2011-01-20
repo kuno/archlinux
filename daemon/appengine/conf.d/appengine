@@ -1,2 +1,2 @@
-VHOSTS=/etc/appengine/vhosts
-PIDFILS=/var/run/appengine.pid
+VHOSTS=/home/kuno/portal/vhosts/appengine
+PIDFILE=/var/run/appengine.pid

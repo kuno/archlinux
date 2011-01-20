@@ -18,8 +18,7 @@ case "$1" in
       . $file
 
       if [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
-        cd $ROOT
-        /opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT/dev_appserver.datastore $ROOT --address=$ADDR --port $PORT --use_sqlite &
+        /opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT/dev_appserver.datastore $ROOT --address=$ADDR --port $PORT --use_sqlite >/dev/null&
         pidof -s python2.5 >> $PIDFILE
       else
         echo "Unknow language or flamework."
@@ -41,7 +40,6 @@ case "$1" in
     for pid in $PIDS
     do
       kill  $pid &> /dev/null
-      #killall gunicorn_django
     done
 
     if [ $? -ne 0 ] ; then
