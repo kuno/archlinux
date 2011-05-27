@@ -2,7 +2,7 @@
 
 # general config
 
-. /etc/conf.d/xcgi
+. ./conf.d/xcgi
 . /etc/rc.conf
 . /etc/rc.d/functions
 
@@ -18,17 +18,17 @@ FILES=$(find $VHOSTS -name \*\.conf)
 	. $file
 
 	if [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'django' ] ; then
-	cd $ROOT_DIR
-	gunicorn_django settings.py -b $ADDR:$PORT --debug --daemon
+	cd $ROOT
+	gunicorn_django $ROOT/settings.py -b $ADDR:$PORT --debug --daemon
 	pidof -s python2 >> $PIDFILE
-	elif [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
-        cd $ROOT_DIR
-	/opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT_DIR/dev_appserver.datastore $ROOT_DIR --address=$ADDR --port $PORT --use_sqlite &
-	pidof -s python2.5 >> $PIDFILE
-	elif [ $LANGUAGE = 'javascript' ] && [ $PLATFORM = 'nodejs' ] ; then
-	cd $ROOT_DIR
-        node $SCRIPT $ADDR $PORT &
-	pidof node -s >> $PIDFILE
+	#elif [ $LANGUAGE = 'python' ] && [ $FLAMEWORK = 'webapp' ] ; then
+    #    cd $ROOT_DIR
+	#/opt/google-appengine/dev_appserver.py -d  --datastore_path=$ROOT_DIR/dev_appserver.datastore $ROOT_DIR --address=$ADDR --port $PORT --use_sqlite &
+	#pidof -s python2.5 >> $PIDFILE
+	#elif [ $LANGUAGE = 'javascript' ] && [ $PLATFORM = 'nodejs' ] ; then
+	#cd $ROOT_DIR
+    #    node $SCRIPT $ADDR $PORT &
+	#pidof node -s >> $PIDFILE
 	else
 	echo "Unknow language or flamework."
 	fi
